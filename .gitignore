@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files (DO NOT commit secrets)
+backend/RoutineTracker/.env
+backend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
