@@ -20,6 +20,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+DATABASE_URL = env.list('DATABASE_URL')
 
 # --------------------------
 # Installed apps
@@ -33,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     # 3rd party
+    "whitenoise.runserver_nostatic",
     "rest_framework",
     "corsheaders",
 
@@ -44,8 +46,9 @@ INSTALLED_APPS = [
 # Middleware
 # --------------------------
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "corsheaders.middleware.CorsMiddleware", 
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    "corsheaders.middleware.CorsMiddleware",     
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -53,6 +56,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 ROOT_URLCONF = "RoutineTracker.urls"
 
@@ -68,9 +73,10 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.request",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",        # admin needs this
                 "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+                "django.contrib.messages.context_processors.messages",  # <-- add this
             ],
         },
     },
@@ -82,18 +88,25 @@ WSGI_APPLICATION = "RoutineTracker.wsgi.application"
 # Database (default sqlite, will read DATABASE_URL if set)
 # --------------------------
 # type: ignore
-from typing import Any
+DATABASES = {
+    'default': env.db(),  # defaults from .env file
+}
 
-if os.getenv("DATABASE_URL"):
-    DATABASES = {"default": env.db("DATABASE_URL")}
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        }
+    },
+    "loggers": {
+        "": {
+            "handlers": ["console"],
+            "level": "DEBUG",
         }
     }
-
+}
 
 # --------------------------
 # Password validation
