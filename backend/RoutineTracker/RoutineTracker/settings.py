@@ -6,7 +6,6 @@ import os
 # Base paths
 # --------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
-print('BASE DIR : ', BASE_DIR)
 # --------------------------
 # Env setup
 # --------------------------
@@ -21,6 +20,9 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 DATABASE_URL = env.list('DATABASE_URL')
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_HTTPONLY = False  # default is False, so browser JS can read it
+
 
 # --------------------------
 # Installed apps
@@ -40,7 +42,16 @@ INSTALLED_APPS = [
 
     # my apps
     "main",
+    "api",
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+
 
 # --------------------------
 # Middleware
@@ -64,7 +75,7 @@ ROOT_URLCONF = "RoutineTracker.urls"
 # --------------------------
 # Templates (point to Vite dist for SPA if needed)
 # --------------------------
-FRONTEND_DIST = BASE_DIR.parent / "frontend" / "dist"
+FRONTEND_DIST = BASE_DIR.parent.parent / 'frontend' / 'frontend' / 'dist'
 
 TEMPLATES = [
     {
